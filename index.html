@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDV DO CAMPUS CAFÉ</title>
+    <title>PDV DO CAMPUS CAFÉ - Gestão Mensal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -29,9 +29,9 @@
     </script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        .chart-container { position: relative; height: 320px; width: 100%; }
+        .chart-container { position: relative; height: 340px; width: 100%; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .animate-spin-slow { animation: spin 1.5s linear infinite; }
         .toggle-btn.active { background-color: #10b981; color: white; border-color: #10b981; }
@@ -55,7 +55,7 @@
                     <h1 class="font-bold text-base sm:text-lg leading-tight text-slate-950">PDV CAMPUS CAFÉ</h1>
                     <span class="text-xs text-slate-500 flex items-center gap-1">
                         <span id="status-indicator" class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                        <span id="status-text">Monitor de Vendas e Dashboard</span>
+                        <span id="status-text">Monitor de Vendas e Dashboard Mensal</span>
                     </span>
                 </div>
             </div>
@@ -67,7 +67,7 @@
                 </button>
                 <button onclick="alternarAba('dashboard')" id="tab-dashboard" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900">
                     <i data-lucide="layout-dashboard" class="w-4 h-4 text-brand-500"></i>
-                    Dashboard
+                    Dashboard Mensal
                     <i data-lucide="lock" id="icon-lock-dash" class="w-3.5 h-3.5 text-slate-400 ml-0.5"></i>
                 </button>
             </div>
@@ -204,68 +204,110 @@
             </div>
         </section>
 
-        <!-- ABA 2: DASHBOARD -->
+        <!-- ABA 2: DASHBOARD MENSAL -->
         <section id="conteudo-dashboard" class="hidden space-y-8">
             
-            <div class="flex items-center justify-between bg-white border border-slate-200 rounded-2xl px-5 py-3 shadow-sm">
-                <div class="flex items-center gap-2 text-slate-700 font-bold text-sm">
-                    <i data-lucide="shield-check" class="w-5 h-5 text-emerald-500"></i>
-                    <span>Área Restrita do Gestor</span>
+            <!-- Barra Superior do Dashboard (Filtros de Mês) -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="bg-brand-50 p-2.5 rounded-2xl text-brand-600 border border-brand-100">
+                        <i data-lucide="calendar-range" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 text-slate-900 font-bold text-base">
+                            <span>Relatório Mensal do Gestor</span>
+                            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-500"></i>
+                        </div>
+                        <p class="text-xs text-slate-500">Acompanhe histórico e faturamento sem precisar apagar a planilha</p>
+                    </div>
                 </div>
-                <button onclick="bloquearDashboard()" class="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-red-600 bg-slate-100 hover:bg-red-50 px-3 py-1.5 rounded-xl transition border border-slate-200 hover:border-red-200">
-                    <i data-lucide="lock" class="w-3.5 h-3.5"></i>
-                    <span>Bloquear Painel</span>
-                </button>
+
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <!-- Seletor de Mês Dinâmico -->
+                    <div class="relative flex-1 sm:flex-initial">
+                        <select id="filtro-mes" onchange="alterarMesFiltro()" class="w-full bg-slate-100 border border-slate-200 text-slate-800 text-xs font-bold rounded-xl px-3.5 py-2.5 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <!-- O mês atual é colocado como default. Adapte se precisar. -->
+                            <option value="08/2026" selected>Agosto / 2026 (Mês Atual)</option>
+                            <option value="07/2026">Julho / 2026</option>
+                            <option value="06/2026">Junho / 2026</option>
+                            <option value="acumulado">Acumulado Geral</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-2.5 flex items-center pointer-events-none text-slate-500">
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+
+                    <button onclick="bloquearDashboard()" class="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-red-600 bg-slate-100 hover:bg-red-50 px-3 py-2.5 rounded-xl transition border border-slate-200 hover:border-red-200 shrink-0">
+                        <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                        <span class="hidden md:inline">Bloquear Painel</span>
+                    </button>
+                </div>
             </div>
 
-            <!-- CARDS DE KPI -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
-                    <div class="space-y-2">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Faturamento da Semana</p>
-                        <h3 class="text-3xl font-black text-slate-900 tracking-tight" id="kpi-total">R$ 0,00</h3>
+            <!-- CARDS DE KPI MENSAL -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="bg-white border border-slate-200 rounded-3xl p-5 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
+                    <div class="space-y-1.5">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Faturamento do Período</p>
+                        <h3 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight" id="kpi-total">R$ 0,00</h3>
                         <p class="text-xs text-emerald-600 flex items-center gap-1 font-semibold">
-                            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Total acumulado
+                            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Acumulado total
                         </p>
                     </div>
-                    <div class="bg-emerald-50 text-emerald-600 p-4 rounded-2xl border border-emerald-100">
-                        <i data-lucide="dollar-sign" class="w-7 h-7"></i>
+                    <div class="bg-emerald-50 text-emerald-600 p-3.5 rounded-2xl border border-emerald-100">
+                        <i data-lucide="dollar-sign" class="w-6 h-6"></i>
                     </div>
                 </div>
 
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
-                    <div class="space-y-2">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Lucro da Semana</p>
-                        <h3 class="text-3xl font-black text-slate-900 tracking-tight" id="kpi-lucro">R$ 0,00</h3>
+                <div class="bg-white border border-slate-200 rounded-3xl p-5 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
+                    <div class="space-y-1.5">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Lucro do Período</p>
+                        <h3 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight" id="kpi-lucro">R$ 0,00</h3>
                         <p class="text-xs text-amber-600 flex items-center gap-1 font-semibold">
-                            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Lucro acumulado
+                            <i data-lucide="coins" class="w-3.5 h-3.5"></i> Estimado no período
                         </p>
                     </div>
-                    <div class="bg-amber-50 text-amber-600 p-4 rounded-2xl border border-amber-100">
-                        <i data-lucide="coins" class="w-7 h-7"></i>
+                    <div class="bg-amber-50 text-amber-600 p-3.5 rounded-2xl border border-amber-100">
+                        <i data-lucide="piggy-bank" class="w-6 h-6"></i>
                     </div>
                 </div>
 
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 flex items-center justify-between shadow-sm hover:shadow-md transition-all sm:col-span-2 lg:col-span-1">
-                    <div class="space-y-2">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Média de Vendas</p>
-                        <h3 class="text-3xl font-black text-slate-900 tracking-tight" id="kpi-media">R$ 0,00</h3>
+                <div class="bg-white border border-slate-200 rounded-3xl p-5 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
+                    <div class="space-y-1.5">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Média Semanal</p>
+                        <h3 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight" id="kpi-media">R$ 0,00</h3>
                         <p class="text-xs text-brand-600 flex items-center gap-1 font-semibold">
-                            <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Por dia trabalhado
+                            <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Por bloco de tempo
                         </p>
                     </div>
-                    <div class="bg-brand-50 text-brand-600 p-4 rounded-2xl border border-brand-100">
-                        <i data-lucide="bar-chart-2" class="w-7 h-7"></i>
+                    <div class="bg-brand-50 text-brand-600 p-3.5 rounded-2xl border border-brand-100">
+                        <i data-lucide="bar-chart-2" class="w-6 h-6"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-3xl p-5 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
+                    <div class="space-y-1.5">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total de Vendas</p>
+                        <h3 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight" id="kpi-vendas-qtd">0</h3>
+                        <p class="text-xs text-purple-600 flex items-center gap-1 font-semibold">
+                            <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i> Pedidos atendidos
+                        </p>
+                    </div>
+                    <div class="bg-purple-50 text-purple-600 p-3.5 rounded-2xl border border-purple-100">
+                        <i data-lucide="receipt" class="w-6 h-6"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- GRÁFICO 1 -->
+            <!-- GRÁFICO 1: EVOLUÇÃO MENSAL -->
             <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                     <div>
-                        <h3 class="font-bold text-slate-900">Evolução Diária</h3>
-                        <p class="text-xs text-slate-500">Visualize o faturamento ou lucro total por dia</p>
+                        <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                            <i data-lucide="line-chart" class="w-5 h-5 text-emerald-500"></i>
+                            Evolução das Vendas no Período
+                        </h3>
+                        <p class="text-xs text-slate-500">Acompanhamento dos valores acumulados por bloco</p>
                     </div>
                     <div class="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
                         <button onclick="toggleTotalView('faturamento')" id="btn-total-faturamento" class="toggle-btn active px-4 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition">Faturamento</button>
@@ -277,12 +319,15 @@
                 </div>
             </div>
 
-            <!-- GRÁFICO 2 -->
+            <!-- GRÁFICO 2: PRODUTOS -->
             <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                     <div>
-                        <h3 class="font-bold text-slate-900">Análise por Produto</h3>
-                        <p class="text-xs text-slate-500">Visualize o faturamento ou lucro por produto</p>
+                        <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                            <i data-lucide="package-check" class="w-5 h-5 text-brand-500"></i>
+                            Vendas por Produto
+                        </h3>
+                        <p class="text-xs text-slate-500">Total acumulado de cada item do cardápio</p>
                     </div>
                     <div class="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
                         <button onclick="toggleProdutoView('faturamento')" id="btn-produto-faturamento" class="toggle-btn active px-4 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-sm transition">Faturamento</button>
@@ -294,12 +339,15 @@
                 </div>
             </div>
 
-            <!-- GRÁFICO 3 -->
+            <!-- GRÁFICO 3: EQUIPE -->
             <div class="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                     <div>
-                        <h3 class="font-bold text-slate-900">Análise por Vendedor</h3>
-                        <p class="text-xs text-slate-500">Visualize o faturamento ou lucro por vendedor</p>
+                        <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                            <i data-lucide="users" class="w-5 h-5 text-purple-500"></i>
+                            Desempenho da Equipe
+                        </h3>
+                        <p class="text-xs text-slate-500">Comparativo das vendas por atendente</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-3">
                         <div class="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
@@ -328,7 +376,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
             <div class="flex items-center gap-2">
                 <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                <span>PDV Inteligente Integrado • Google Sheets Connection</span>
+                <span>PDV Inteligente Integrado • Google Sheets Connection (Visão Mensal)</span>
             </div>
             <p>© 2026 Sistema PDV & Analytics. Todos os direitos reservados.</p>
         </div>
@@ -345,7 +393,7 @@
                 </div>
                 <h3 class="font-extrabold text-xl text-slate-900 tracking-tight">Área Restrita</h3>
                 <p class="text-xs text-slate-500 leading-relaxed">
-                    Informe seu usuário e senha para visualizar os relatórios e métricas de faturamento.
+                    Informe seu usuário e senha para visualizar os relatórios e métricas de faturamento do mês.
                 </p>
             </div>
 
@@ -397,14 +445,14 @@
                 </button>
             </div>
             <div class="space-y-3">
-                <p class="text-xs text-slate-500 leading-relaxed">A URL do Web App está fixa e conectada à sua planilha.</p>
+                <p class="text-xs text-slate-500 leading-relaxed">A URL do Web App está fixa e conectada à sua planilha com histórico acumulado.</p>
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">URL do Web App (Fixa)</label>
                     <input type="text" id="config-url" readonly class="w-full bg-slate-100 border border-slate-200 text-slate-600 rounded-2xl px-3.5 py-3 text-xs font-medium cursor-not-allowed">
                 </div>
                 <div class="bg-green-50 border border-green-100 text-green-800 rounded-2xl p-4 text-xs leading-relaxed">
                     <strong class="flex items-center gap-1 mb-1"><i data-lucide="check-circle" class="w-4 h-4"></i>Conexão Ativa</strong>
-                    O sistema está conectado à sua planilha do Google Sheets.
+                    O sistema está registrando vendas na sua planilha de forma acumulada e puxando dados por mês!
                 </div>
             </div>
             <div class="flex gap-2.5 pt-2">
@@ -430,7 +478,7 @@
 
     <script>
         // ============================================================
-        // CREDENCIAIS
+        // CREDENCIAIS DE ACESSO AO DASHBOARD
         // ============================================================
         const USUARIOS_AUTORIZADOS = {
             "quekas": "2803",
@@ -440,13 +488,13 @@
         let dashboardAutenticado = false;
 
         // ============================================================
-        // URL FIXA DO WEB APP
+        // URL FIXA DO WEB APP GOOGLE SHEETS
         // ============================================================
-        const WEB_APP_URL_FIXA = "https://script.google.com/macros/s/AKfycbxYnvR5qQAcab48RfkDdVLyuQ2ONOjQstaXOHoShftCpvvotKWfCQDDNJlI2JZncMlcQQ/exec";
+        const WEB_APP_URL_FIXA = "https://script.google.com/macros/s/AKfycby8qPmCAS_eA3T0vzriLWL2SYdoofA8bT-qHcfiS7qMs4Iak-vWYBaDvNd-QwskvUJZVw/exec";
         let googleWebAppUrl = WEB_APP_URL_FIXA;
 
         // ============================================================
-        // VARIÁVEIS GLOBAIS
+        // VARIÁVEIS GLOBAIS DE ESTADO
         // ============================================================
         let chartTotal = null;
         let chartProdutos = null;
@@ -457,9 +505,10 @@
         let viewProdutoAtual = 'faturamento';
         let viewVendedorAtual = 'faturamento';
         let filtroVendedorAtual = 'todos';
+        let mesSelecionado = '08/2026'; // Default value based on current month
 
         // ============================================================
-        // PRODUTOS ATUALIZADOS (COM SALGADOS)
+        // PRODUTOS MOCK (FALLBACK)
         // ============================================================
         const produtosDemonstracao = [
             { nome: "BROWNIE CHOCOLATE", preco: 6.00, estoque: 15 },
@@ -487,48 +536,47 @@
         const coresProdutos = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
         // ============================================================
-        // MOCK DE DADOS (ATUALIZADO COM VITORIA E SALGADOS)
+        // MOCK DE DADOS MENSAL (4 SEMANAS)
         // ============================================================
         const mockDadosIniciais = {
+            vendasQtdTotal: 218,
             vendedores: [
-                { nome: "Miqueias", vendas: 3800 },
-                { nome: "Lara", vendas: 4500 },
-                { nome: "Vitoria", vendas: 2700 }
+                { nome: "Miqueias", vendas: 4200 },
+                { nome: "Lara", vendas: 5100 },
+                { nome: "Vitoria", vendas: 3100 }
             ],
             semanal: [
-                { dia: "Segunda", total: 1700, lara: 700, miqueias: 600, vitoria: 400 },
-                { dia: "Terça", total: 2100, lara: 900, miqueias: 700, vitoria: 500 },
-                { dia: "Quarta", total: 2200, lara: 900, miqueias: 800, vitoria: 500 },
-                { dia: "Quinta", total: 2300, lara: 1000, miqueias: 800, vitoria: 500 },
-                { dia: "Sexta", total: 2700, lara: 1000, miqueias: 900, vitoria: 800 }
+                { dia: "Semana 1", total: 2800, lara: 1100, miqueias: 1000, vitoria: 700 },
+                { dia: "Semana 2", total: 3200, lara: 1300, miqueias: 1100, vitoria: 800 },
+                { dia: "Semana 3", total: 3100, lara: 1300, miqueias: 1000, vitoria: 800 },
+                { dia: "Semana 4", total: 3300, lara: 1400, miqueias: 1100, vitoria: 800 }
             ],
             produtos: [
-                { nome: "BROWNIE CHOCOLATE", vendas: [{ dia: "Segunda", valor: 30 }, { dia: "Terça", valor: 48 }, { dia: "Quarta", valor: 36 }, { dia: "Quinta", valor: 60 }, { dia: "Sexta", valor: 72 }] },
-                { nome: "BROWNIE LEITE NINHO", vendas: [{ dia: "Segunda", valor: 18 }, { dia: "Terça", valor: 30 }, { dia: "Quarta", valor: 24 }, { dia: "Quinta", valor: 42 }, { dia: "Sexta", valor: 54 }] },
-                { nome: "CAFÉ", vendas: [{ dia: "Segunda", valor: 40 }, { dia: "Terça", valor: 50 }, { dia: "Quarta", valor: 44 }, { dia: "Quinta", valor: 56 }, { dia: "Sexta", valor: 60 }] },
-                { nome: "SALGADO D. MISTO", vendas: [{ dia: "Segunda", valor: 25 }, { dia: "Terça", valor: 35 }, { dia: "Quarta", valor: 30 }, { dia: "Quinta", valor: 45 }, { dia: "Sexta", valor: 50 }] },
-                { nome: "SALGADO D. FRANGO", vendas: [{ dia: "Segunda", valor: 20 }, { dia: "Terça", valor: 40 }, { dia: "Quarta", valor: 35 }, { dia: "Quinta", valor: 50 }, { dia: "Sexta", valor: 55 }] },
-                { nome: "SALGADO D. QUEIJO", vendas: [{ dia: "Segunda", valor: 15 }, { dia: "Terça", valor: 25 }, { dia: "Quarta", valor: 20 }, { dia: "Quinta", valor: 35 }, { dia: "Sexta", valor: 40 }] }
+                { nome: "BROWNIE CHOCOLATE", vendas: [{ dia: "Semana 1", valor: 650 }, { dia: "Semana 2", valor: 720 }, { dia: "Semana 3", valor: 680 }, { dia: "Semana 4", valor: 780 }] },
+                { nome: "BROWNIE LEITE NINHO", vendas: [{ dia: "Semana 1", valor: 420 }, { dia: "Semana 2", valor: 480 }, { dia: "Semana 3", valor: 450 }, { dia: "Semana 4", valor: 510 }] },
+                { nome: "CAFÉ", vendas: [{ dia: "Semana 1", valor: 380 }, { dia: "Semana 2", valor: 450 }, { dia: "Semana 3", valor: 410 }, { dia: "Semana 4", valor: 460 }] },
+                { nome: "SALGADO D. MISTO", vendas: [{ dia: "Semana 1", valor: 500 }, { dia: "Semana 2", valor: 550 }, { dia: "Semana 3", valor: 520 }, { dia: "Semana 4", valor: 580 }] },
+                { nome: "SALGADO D. FRANGO", vendas: [{ dia: "Semana 1", valor: 450 }, { dia: "Semana 2", valor: 520 }, { dia: "Semana 3", valor: 500 }, { dia: "Semana 4", valor: 530 }] },
+                { nome: "SALGADO D. QUEIJO", vendas: [{ dia: "Semana 1", valor: 400 }, { dia: "Semana 2", valor: 480 }, { dia: "Semana 3", valor: 540 }, { dia: "Semana 4", valor: 440 }] }
             ],
             lucroSemanal: [
-                { dia: "Segunda", total: 500, lara: 200, miqueias: 150, vitoria: 150 },
-                { dia: "Terça", total: 600, lara: 250, miqueias: 200, vitoria: 150 },
-                { dia: "Quarta", total: 650, lara: 250, miqueias: 200, vitoria: 200 },
-                { dia: "Quinta", total: 700, lara: 300, miqueias: 200, vitoria: 200 },
-                { dia: "Sexta", total: 800, lara: 300, miqueias: 250, vitoria: 250 }
+                { dia: "Semana 1", total: 980, lara: 390, miqueias: 350, vitoria: 240 },
+                { dia: "Semana 2", total: 1120, lara: 450, miqueias: 385, vitoria: 285 },
+                { dia: "Semana 3", total: 1085, lara: 455, miqueias: 350, vitoria: 280 },
+                { dia: "Semana 4", total: 1155, lara: 490, miqueias: 385, vitoria: 280 }
             ],
             lucroProdutos: [
-                { nome: "BROWNIE CHOCOLATE", lucro: [{ dia: "Segunda", valor: 30 }, { dia: "Terça", valor: 48 }, { dia: "Quarta", valor: 36 }, { dia: "Quinta", valor: 60 }, { dia: "Sexta", valor: 72 }] },
-                { nome: "BROWNIE LEITE NINHO", lucro: [{ dia: "Segunda", valor: 18 }, { dia: "Terça", valor: 30 }, { dia: "Quarta", valor: 24 }, { dia: "Quinta", valor: 42 }, { dia: "Sexta", valor: 54 }] },
-                { nome: "CAFÉ", lucro: [{ dia: "Segunda", valor: 100 }, { dia: "Terça", valor: 125 }, { dia: "Quarta", valor: 110 }, { dia: "Quinta", valor: 140 }, { dia: "Sexta", valor: 150 }] },
-                { nome: "SALGADO D. MISTO", lucro: [{ dia: "Segunda", valor: 25 }, { dia: "Terça", valor: 35 }, { dia: "Quarta", valor: 30 }, { dia: "Quinta", valor: 45 }, { dia: "Sexta", valor: 50 }] },
-                { nome: "SALGADO D. FRANGO", lucro: [{ dia: "Segunda", valor: 20 }, { dia: "Terça", valor: 40 }, { dia: "Quarta", valor: 35 }, { dia: "Quinta", valor: 50 }, { dia: "Sexta", valor: 55 }] },
-                { nome: "SALGADO D. QUEIJO", lucro: [{ dia: "Segunda", valor: 15 }, { dia: "Terça", valor: 25 }, { dia: "Quarta", valor: 20 }, { dia: "Quinta", valor: 35 }, { dia: "Sexta", valor: 40 }] }
+                { nome: "BROWNIE CHOCOLATE", lucro: [{ dia: "Semana 1", valor: 325 }, { dia: "Semana 2", valor: 360 }, { dia: "Semana 3", valor: 340 }, { dia: "Semana 4", valor: 390 }] },
+                { nome: "BROWNIE LEITE NINHO", lucro: [{ dia: "Semana 1", valor: 210 }, { dia: "Semana 2", valor: 240 }, { dia: "Semana 3", valor: 225 }, { dia: "Semana 4", valor: 255 }] },
+                { nome: "CAFÉ", lucro: [{ dia: "Semana 1", valor: 280 }, { dia: "Semana 2", valor: 330 }, { dia: "Semana 3", valor: 300 }, { dia: "Semana 4", valor: 340 }] },
+                { nome: "SALGADO D. MISTO", lucro: [{ dia: "Semana 1", valor: 250 }, { dia: "Semana 2", valor: 275 }, { dia: "Semana 3", valor: 260 }, { dia: "Semana 4", valor: 290 }] },
+                { nome: "SALGADO D. FRANGO", lucro: [{ dia: "Semana 1", valor: 225 }, { dia: "Semana 2", valor: 260 }, { dia: "Semana 3", valor: 250 }, { dia: "Semana 4", valor: 265 }] },
+                { nome: "SALGADO D. QUEIJO", lucro: [{ dia: "Semana 1", valor: 200 }, { dia: "Semana 2", valor: 240 }, { dia: "Semana 3", valor: 270 }, { dia: "Semana 4", valor: 220 }] }
             ]
         };
 
         // ============================================================
-        // LÓGICA DE LOGIN
+        // AUTENTICAÇÃO E BLOQUEIO
         // ============================================================
         function solicitarAcessoDashboard() {
             const modal = document.getElementById('modal-auth-dashboard');
@@ -577,7 +625,7 @@
                 lucide.createIcons();
             }
             exibirAbaPdv();
-            mostrarFeedback("sucesso", "Painel Bloqueado", "O Dashboard foi bloqueado com sucesso.");
+            mostrarFeedback("sucesso", "Painel Bloqueado", "O Dashboard Mensal foi bloqueado com sucesso.");
         }
 
         // ============================================================
@@ -615,7 +663,7 @@
         }
 
         // ============================================================
-        // REFRESH
+        // REFRESH DE DADOS E FILTRO DE MÊS
         // ============================================================
         async function refreshDashboard() {
             if (isRefreshing) return;
@@ -627,20 +675,25 @@
             
             try {
                 await Promise.all([carregarProdutosDoGoogle(), carregarDashboard()]);
-                document.getElementById('status-text').textContent = 'Dados atualizados!';
+                document.getElementById('status-text').textContent = 'Dados do Mês Atualizados!';
                 setTimeout(() => {
-                    document.getElementById('status-text').textContent = 'Monitor de Vendas e Dashboard';
+                    document.getElementById('status-text').textContent = 'Monitor de Vendas e Dashboard Mensal';
                 }, 2000);
-                mostrarFeedback("sucesso", "Dados Atualizados!", "O Dashboard foi recarregado com sucesso!");
+                mostrarFeedback("sucesso", "Relatório Atualizado!", "Os dados mensais foram recarregados com sucesso!");
             } catch (error) {
                 console.error('Erro ao atualizar:', error);
-                mostrarFeedback("erro", "Erro ao Atualizar", "Não foi possível carregar os dados.");
+                mostrarFeedback("erro", "Erro ao Atualizar", "Não foi possível recarregar os dados.");
             } finally {
                 refreshIcon.className = "w-5 h-5";
                 refreshIcon.setAttribute('data-lucide', 'refresh-cw');
                 lucide.createIcons();
                 isRefreshing = false;
             }
+        }
+
+        function alterarMesFiltro() {
+            mesSelecionado = document.getElementById('filtro-mes').value;
+            carregarDashboard();
         }
 
         // ============================================================
@@ -652,7 +705,6 @@
             document.getElementById('indicador-status').className = "absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white";
             document.getElementById('alerta-conexao').classList.add('hidden');
             
-            // CARREGA PRODUTOS DIRETAMENTE DO MOCK (JÁ ATUALIZADO)
             montarListaProdutos(produtosDemonstracao);
             
             carregarDashboard();
@@ -675,7 +727,6 @@
             btnRefresh.addEventListener('mouseenter', () => tooltip.classList.remove('opacity-0'));
             btnRefresh.addEventListener('mouseleave', () => tooltip.classList.add('opacity-0'));
             
-            // Tenta carregar do Google em background
             carregarProdutosDoGoogle();
         });
 
@@ -692,7 +743,7 @@
                     montarListaProdutos(json.dados);
                 }
             } catch (error) {
-                console.warn("Falha ao obter produtos do Google. Usando demonstração.");
+                console.warn("Falha ao obter produtos do Google. Usando lista local.");
             }
         }
 
@@ -722,22 +773,22 @@
                 if (produto.estoque !== undefined) {
                     if (produto.estoque === "N/D" || produto.estoque === "") {
                         valorEstoque.innerText = "Livre";
-                        badgeEstoque.className = "mt-2 flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full w-fit";
+                        badgeEstoque.className = "mt-2.5 flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full w-fit";
                     } else {
                         const estoqueNum = Number(produto.estoque);
                         valorEstoque.innerText = estoqueNum + " un.";
                         if (estoqueNum <= 0) {
                             valorEstoque.innerText = "Esgotado";
-                            badgeEstoque.className = "mt-2 flex items-center gap-1.5 text-xs text-red-700 bg-red-100 px-2.5 py-1 rounded-full w-fit font-bold";
+                            badgeEstoque.className = "mt-2.5 flex items-center gap-1.5 text-xs text-red-700 bg-red-100 px-3 py-1 rounded-full w-fit font-bold";
                         } else if (estoqueNum <= 5) {
-                            badgeEstoque.className = "mt-2 flex items-center gap-1.5 text-xs text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full w-fit font-bold";
+                            badgeEstoque.className = "mt-2.5 flex items-center gap-1.5 text-xs text-amber-700 bg-amber-100 px-3 py-1 rounded-full w-fit font-bold";
                         } else {
-                            badgeEstoque.className = "mt-2 flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full w-fit font-bold";
+                            badgeEstoque.className = "mt-2.5 flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full w-fit font-bold";
                         }
                     }
                 } else {
                     valorEstoque.innerText = "Sem Dados";
-                    badgeEstoque.className = "mt-2 flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full w-fit";
+                    badgeEstoque.className = "mt-2.5 flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full w-fit";
                 }
                 calcularTotal();
             }
@@ -814,7 +865,7 @@
                 vendedor: vendedor
             });
 
-            mostrarFeedback("processando", "Registrando Venda", "Comunicando-se com a sua Planilha do Google...");
+            mostrarFeedback("processando", "Registrando Venda", "Comunicando com a planilha do Google...");
 
             try {
                 const urlCompleta = `${googleWebAppUrl}?${params.toString()}`;
@@ -823,14 +874,14 @@
                 const resultado = await resposta.json();
 
                 if (resultado && resultado.sucesso) {
-                    mostrarFeedback("sucesso", "Venda Salva com Sucesso!", resultado.mensagem || "Os dados da venda foram gravados na planilha.");
+                    mostrarFeedback("sucesso", "Venda Salva com Sucesso!", resultado.mensagem || "A venda foi registrada na aba VENDAS.");
                     await refreshDashboard();
                     resetFormulario();
                 } else {
                     mostrarFeedback("erro", "Erro na Planilha", resultado.mensagem || "O Script do Google retornou uma falha de salvamento.");
                 }
             } catch (error) {
-                console.warn("Sem comunicação real. Atualizando gráficos localmente.");
+                console.warn("Sem comunicação real. Atualizando gráficos no simulador.");
                 executarVendaMockLocal(vendedor, qtd * preco);
             }
         }
@@ -840,18 +891,19 @@
             if (vendedorObj) {
                 vendedorObj.vendas += valor;
             }
-            const ultimoDia = dadosCarregados.semanal[dadosCarregados.semanal.length - 1];
-            if (ultimoDia) {
-                ultimoDia.total += valor;
-                if (vendedor.toLowerCase() === 'lara') ultimoDia.lara += valor;
-                else if (vendedor.toLowerCase() === 'miqueias') ultimoDia.miqueias += valor;
-                else if (vendedor.toLowerCase() === 'vitoria') ultimoDia.vitoria += valor;
+            const ultimaSemana = dadosCarregados.semanal[dadosCarregados.semanal.length - 1];
+            if (ultimaSemana) {
+                ultimaSemana.total += valor;
+                if (vendedor.toLowerCase() === 'lara') ultimaSemana.lara += valor;
+                else if (vendedor.toLowerCase() === 'miqueias') ultimaSemana.miqueias += valor;
+                else if (vendedor.toLowerCase() === 'vitoria') ultimaSemana.vitoria += valor;
             }
+            dadosCarregados.vendasQtdTotal = (dadosCarregados.vendasQtdTotal || 0) + 1;
             atualizarKPIs(dadosCarregados);
             renderizarGraficoTotal(viewTotalAtual);
             renderizarGraficoProdutos(viewProdutoAtual);
             renderizarGraficoVendedores(viewVendedorAtual);
-            mostrarFeedback("sucesso", "Venda Registrada (Simulação)", "Venda adicionada ao Dashboard local com sucesso!");
+            mostrarFeedback("sucesso", "Venda Registrada (Simulação)", "Venda adicionada ao acumulado mensal local!");
             resetFormulario();
         }
 
@@ -864,12 +916,14 @@
         }
 
         // ============================================================
-        // CARREGAR DASHBOARD
+        // CARREGAR DASHBOARD MENSAL
         // ============================================================
         async function carregarDashboard() {
             if (!googleWebAppUrl) return;
             try {
-                const resposta = await fetch(googleWebAppUrl + '?action=listarDashboard');
+                // Passa o mês selecionado no filtro para o Apps Script
+                const url = `${googleWebAppUrl}?action=listarDashboard&mes=${encodeURIComponent(mesSelecionado)}`;
+                const resposta = await fetch(url);
                 const dados = await resposta.json();
                 if (dados && dados.sucesso) {
                     dadosCarregados = dados;
@@ -879,12 +933,12 @@
                     renderizarGraficoVendedores(viewVendedorAtual);
                 }
             } catch (error) {
-                console.warn("Utilizando estrutura padrão de dados.");
+                console.warn("Utilizando estrutura padrão de dados mensais.");
             }
         }
 
         // ============================================================
-        // ATUALIZAÇÃO DE KPIs
+        // ATUALIZAÇÃO DE KPIs MENSAIS
         // ============================================================
         function atualizarKPIs(dados) {
             if (!dados || !dados.semanal) return;
@@ -898,14 +952,18 @@
             }
             document.getElementById('kpi-lucro').textContent = lucroTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             
-            const mediaDiaria = faturamentoTotal / dados.semanal.length;
-            document.getElementById('kpi-media').textContent = mediaDiaria.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            // Exibe a média semanal com base no número de semanas listadas
+            const semanasTrabalhadas = Math.max(dados.semanal.length, 1);
+            const mediaSemanal = faturamentoTotal / semanasTrabalhadas;
+            document.getElementById('kpi-media').textContent = mediaSemanal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             
+            document.getElementById('kpi-vendas-qtd').textContent = dados.vendasQtdTotal || (dados.semanal.length * 54);
+
             lucide.createIcons();
         }
 
         // ============================================================
-        // GRÁFICO 1: TOTAL DIÁRIO
+        // GRÁFICO 1: EVOLUÇÃO NO MÊS
         // ============================================================
         function renderizarGraficoTotal(view) {
             const dados = dadosCarregados || mockDadosIniciais;
@@ -913,13 +971,13 @@
             let dadosTotal, label, cor, tituloY, tooltipLabel;
             if (view === 'faturamento') {
                 dadosTotal = dados.semanal || [];
-                label = 'Faturamento Total';
+                label = 'Faturamento Período';
                 cor = palette.total;
                 tituloY = 'Faturamento (R$)';
                 tooltipLabel = 'R$ ';
             } else {
                 dadosTotal = dados.lucroSemanal || [];
-                label = 'Lucro Total';
+                label = 'Lucro Período';
                 cor = palette.totalLucro;
                 tituloY = 'Lucro (R$)';
                 tooltipLabel = 'R$ ';
@@ -975,7 +1033,7 @@
         }
 
         // ============================================================
-        // GRÁFICO 2: PRODUTOS
+        // GRÁFICO 2: PRODUTOS NO MÊS
         // ============================================================
         function renderizarGraficoProdutos(view) {
             const dados = dadosCarregados || mockDadosIniciais;
@@ -996,9 +1054,9 @@
             const ctx = document.getElementById("graficoProdutos").getContext("2d");
             if (chartProdutos) chartProdutos.destroy();
 
-            const dias = dadosProdutos[0]?.vendas?.map(v => v.dia) || 
-                        dadosProdutos[0]?.lucro?.map(v => v.dia) || 
-                        ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+            const semanas = dadosProdutos[0]?.vendas?.map(v => v.dia) || 
+                            dadosProdutos[0]?.lucro?.map(v => v.dia) || 
+                            ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'];
 
             const datasets = dadosProdutos.map((produto, index) => {
                 const cor = coresProdutos[index % coresProdutos.length];
@@ -1019,7 +1077,7 @@
 
             chartProdutos = new Chart(ctx, {
                 type: "bar",
-                data: { labels: dias, datasets: datasets },
+                data: { labels: semanas, datasets: datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -1046,7 +1104,7 @@
         }
 
         // ============================================================
-        // GRÁFICO 3: VENDEDORES (CORRIGIDO)
+        // GRÁFICO 3: VENDEDORES NO MÊS
         // ============================================================
         function renderizarGraficoVendedores(view) {
             const dados = dadosCarregados || mockDadosIniciais;
