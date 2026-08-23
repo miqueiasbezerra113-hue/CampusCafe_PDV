@@ -66,7 +66,7 @@
                     <span class="hidden sm:inline">PDV Campus Café</span>
                 </button>
                 <button onclick="alternarAba('dashboard')" id="tab-dashboard" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-slate-900">
-                    <i data-lucide="layout-dashboard" class="w-4 h-4 text-brand-500"></i>
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 text-brand-500"></i>
                     Dashboard Mensal
                     <i data-lucide="lock" id="icon-lock-dash" class="w-3.5 h-3.5 text-slate-400 ml-0.5"></i>
                 </button>
@@ -226,11 +226,7 @@
                     <!-- Seletor de Mês Dinâmico -->
                     <div class="relative flex-1 sm:flex-initial">
                         <select id="filtro-mes" onchange="alterarMesFiltro()" class="w-full bg-slate-100 border border-slate-200 text-slate-800 text-xs font-bold rounded-xl px-3.5 py-2.5 appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                            <!-- O mês atual é colocado como default. Adapte se precisar. -->
-                            <option value="08/2026" selected>Agosto / 2026 (Mês Atual)</option>
-                            <option value="07/2026">Julho / 2026</option>
-                            <option value="06/2026">Junho / 2026</option>
-                            <option value="acumulado">Acumulado Geral</option>
+                            <!-- Preenchido dinamicamente via JavaScript -->
                         </select>
                         <div class="absolute inset-y-0 right-2.5 flex items-center pointer-events-none text-slate-500">
                             <i data-lucide="chevron-down" class="w-4 h-4"></i>
@@ -478,7 +474,8 @@
 
     <script>
         // ============================================================
-        // CREDENCIAIS DE ACESSO AO DASHBOARD
+        // CREDENCIAIS DE ACESSO AO DASHBOARD (fallback local)
+        // Em produção, valide via Apps Script chamando action=autenticar
         // ============================================================
         const USUARIOS_AUTORIZADOS = {
             "quekas": "2803",
@@ -490,7 +487,7 @@
         // ============================================================
         // URL FIXA DO WEB APP GOOGLE SHEETS
         // ============================================================
-        const WEB_APP_URL_FIXA = "https://script.google.com/macros/s/AKfycby8qPmCAS_eA3T0vzriLWL2SYdoofA8bT-qHcfiS7qMs4Iak-vWYBaDvNd-QwskvUJZVw/exec";
+        const WEB_APP_URL_FIXA = "https://script.google.com/macros/s/AKfycbyKhJ8cGK8CjVQc4DT3vd6RSrBZMn1d-IoXRO0XGGbhaMlcYl6sNPItWvYDrWFUoEZZEA/exec";
         let googleWebAppUrl = WEB_APP_URL_FIXA;
 
         // ============================================================
@@ -505,7 +502,7 @@
         let viewProdutoAtual = 'faturamento';
         let viewVendedorAtual = 'faturamento';
         let filtroVendedorAtual = 'todos';
-        let mesSelecionado = '08/2026'; // Default value based on current month
+        let mesSelecionado = '';
 
         // ============================================================
         // PRODUTOS MOCK (FALLBACK)
@@ -578,31 +575,44 @@
         // ============================================================
         // AUTENTICAÇÃO E BLOQUEIO
         // ============================================================
-        function solicitarAcessoDashboard() {
-            const modal = document.getElementById('modal-auth-dashboard');
-            document.getElementById('auth-usuario').value = '';
-            document.getElementById('auth-senha').value = '';
-            document.getElementById('auth-erro').classList.add('hidden');
-            modal.classList.remove('hidden');
-            setTimeout(() => { document.getElementById('auth-usuario').focus(); }, 100);
-        }
-
-        function validarLoginDashboard(e) {
+        async function validarLoginDashboard(e) {
             e.preventDefault();
             const usr = document.getElementById('auth-usuario').value.trim().toLowerCase();
             const pwd = document.getElementById('auth-senha').value;
 
+            // Primeiro tenta validar via Apps Script
+            try {
+                const url = `${googleWebAppUrl}?action=autenticar&usuario=${encodeURIComponent(usr)}&senha=${encodeURIComponent(pwd)}`;
+                const resposta = await fetch(url);
+                if (resposta.ok) {
+                    const json = await resposta.json();
+                    if (json.sucesso && json.autenticado) {
+                        dashboardAutenticado = true;
+                        document.getElementById('modal-auth-dashboard').classList.add('hidden');
+                        const lockIcon = document.getElementById('icon-lock-dash');
+                        if (lockIcon) {
+                            lockIcon.setAttribute('data-lucide', 'unlock');
+                            lockIcon.className = 'w-3.5 h-3.5 text-emerald-500 ml-0.5';
+                            lucide.createIcons();
+                        }
+                        exibirAbaDashboard();
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.warn("Falha na autenticação via servidor, usando fallback local.");
+            }
+
+            // Fallback local (credenciais fixas)
             if (USUARIOS_AUTORIZADOS[usr] && USUARIOS_AUTORIZADOS[usr] === pwd) {
                 dashboardAutenticado = true;
                 document.getElementById('modal-auth-dashboard').classList.add('hidden');
-                
                 const lockIcon = document.getElementById('icon-lock-dash');
                 if (lockIcon) {
                     lockIcon.setAttribute('data-lucide', 'unlock');
                     lockIcon.className = 'w-3.5 h-3.5 text-emerald-500 ml-0.5';
                     lucide.createIcons();
                 }
-
                 exibirAbaDashboard();
             } else {
                 document.getElementById('auth-erro').classList.remove('hidden');
@@ -626,6 +636,15 @@
             }
             exibirAbaPdv();
             mostrarFeedback("sucesso", "Painel Bloqueado", "O Dashboard Mensal foi bloqueado com sucesso.");
+        }
+
+        function solicitarAcessoDashboard() {
+            const modal = document.getElementById('modal-auth-dashboard');
+            document.getElementById('auth-usuario').value = '';
+            document.getElementById('auth-senha').value = '';
+            document.getElementById('auth-erro').classList.add('hidden');
+            modal.classList.remove('hidden');
+            setTimeout(() => { document.getElementById('auth-usuario').focus(); }, 100);
         }
 
         // ============================================================
@@ -682,7 +701,7 @@
                 mostrarFeedback("sucesso", "Relatório Atualizado!", "Os dados mensais foram recarregados com sucesso!");
             } catch (error) {
                 console.error('Erro ao atualizar:', error);
-                mostrarFeedback("erro", "Erro ao Atualizar", "Não foi possível recarregar os dados.");
+                mostrarFeedback("erro", "Erro ao Atualizar", "Não foi possível recarregar os dados. Verifique sua conexão.");
             } finally {
                 refreshIcon.className = "w-5 h-5";
                 refreshIcon.setAttribute('data-lucide', 'refresh-cw');
@@ -705,6 +724,7 @@
             document.getElementById('indicador-status').className = "absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white";
             document.getElementById('alerta-conexao').classList.add('hidden');
             
+            preencherMeses();
             montarListaProdutos(produtosDemonstracao);
             
             carregarDashboard();
@@ -921,9 +941,9 @@
         async function carregarDashboard() {
             if (!googleWebAppUrl) return;
             try {
-                // Passa o mês selecionado no filtro para o Apps Script
                 const url = `${googleWebAppUrl}?action=listarDashboard&mes=${encodeURIComponent(mesSelecionado)}`;
                 const resposta = await fetch(url);
+                if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
                 const dados = await resposta.json();
                 if (dados && dados.sucesso) {
                     dadosCarregados = dados;
@@ -931,9 +951,21 @@
                     renderizarGraficoTotal(viewTotalAtual);
                     renderizarGraficoProdutos(viewProdutoAtual);
                     renderizarGraficoVendedores(viewVendedorAtual);
+                } else {
+                    throw new Error(dados?.mensagem || 'Erro desconhecido');
                 }
             } catch (error) {
-                console.warn("Utilizando estrutura padrão de dados mensais.");
+                console.warn("Erro ao carregar dashboard, usando dados mock:", error);
+                // Se ainda não temos dados, usamos o mock
+                if (!dadosCarregados) {
+                    dadosCarregados = mockDadosIniciais;
+                    atualizarKPIs(dadosCarregados);
+                    renderizarGraficoTotal(viewTotalAtual);
+                    renderizarGraficoProdutos(viewProdutoAtual);
+                    renderizarGraficoVendedores(viewVendedorAtual);
+                }
+                // Exibe alerta de modo de demonstração
+                document.getElementById('alerta-conexao').classList.remove('hidden');
             }
         }
 
@@ -952,7 +984,6 @@
             }
             document.getElementById('kpi-lucro').textContent = lucroTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             
-            // Exibe a média semanal com base no número de semanas listadas
             const semanasTrabalhadas = Math.max(dados.semanal.length, 1);
             const mediaSemanal = faturamentoTotal / semanasTrabalhadas;
             document.getElementById('kpi-media').textContent = mediaSemanal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -1256,6 +1287,66 @@
                 mostrarFeedback("sucesso", "Link do App", "Copie o link: " + shareUrl);
             }
             document.body.removeChild(tempInput);
+        }
+
+        // ============================================================
+        // GERAR MESES DINAMICAMENTE
+        // ============================================================
+        function preencherMeses() {
+            const select = document.getElementById('filtro-mes');
+            select.innerHTML = '';
+            const hoje = new Date();
+            // Preencher últimos 6 meses
+            for (let i = 0; i < 6; i++) {
+                const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+                const mes = String(data.getMonth() + 1).padStart(2, '0');
+                const ano = data.getFullYear();
+                const value = `${mes}/${ano}`;
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = `${data.toLocaleString('pt-BR', { month: 'long' })} / ${ano}`;
+                if (i === 0) {
+                    option.selected = true;
+                    mesSelecionado = value;
+                }
+                select.appendChild(option);
+            }
+            // Adicionar opção "Acumulado"
+            const optAcum = document.createElement('option');
+            optAcum.value = 'acumulado';
+            optAcum.textContent = 'Acumulado Geral';
+            select.appendChild(optAcum);
+
+            // Tentar carregar meses adicionais da planilha (opcional)
+            carregarMesesDoGoogle();
+        }
+
+        async function carregarMesesDoGoogle() {
+            try {
+                const url = `${googleWebAppUrl}?action=listarMeses`;
+                const resposta = await fetch(url);
+                if (!resposta.ok) throw new Error();
+                const json = await resposta.json();
+                if (json.sucesso && Array.isArray(json.meses)) {
+                    const select = document.getElementById('filtro-mes');
+                    // Remove opções duplicadas (já temos os 6 meses + acumulado)
+                    // Adiciona os que não existem
+                    const opcoesExistentes = new Set();
+                    for (let opt of select.options) {
+                        opcoesExistentes.add(opt.value);
+                    }
+                    json.meses.forEach(mes => {
+                        if (!opcoesExistentes.has(mes)) {
+                            const option = document.createElement('option');
+                            option.value = mes;
+                            option.textContent = mes; // pode formatar melhor
+                            select.appendChild(option);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn("Não foi possível carregar meses extras da planilha.");
+            }
         }
 
         // ============================================================
